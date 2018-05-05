@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 
-class Utils {
+class DateUtils {
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final Scanner scanner = new Scanner(System.in);

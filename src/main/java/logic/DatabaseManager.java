@@ -4,11 +4,11 @@ import com.mongodb.*;
 
 import java.util.Map;
 
-class Database {
+class DatabaseManager {
     private static DB database;
 
     @SuppressWarnings("deprecation")
-    Database() {
+    DatabaseManager() {
         MongoClient mongoClient = new MongoClient("localhost", 27017);
         database = mongoClient.getDB("myMongoDb");
     }
@@ -23,6 +23,7 @@ class Database {
         collection.insert(document);
     }
 
+    @SuppressWarnings("unused")
     void clear() {
         for (String collectionName : database.getCollectionNames()) {
             database.getCollection(collectionName).drop();
@@ -49,17 +50,24 @@ class Database {
         }
     }
 
-    private void printOffer(DBObject obj) {
-        System.out.println("AccountName: " + obj.get("accountName") + "\n" +
-                "AvailableFrom: " + obj.get("availableFrom") + "\n" +
-                "AvailableTo: " + obj.get("availableTo") + "\n" +
-                "PricePerDay: " + obj.get("pricePerDay") + "\n");
+    DBObject getDocument(DBCollection collection, Map<String, Object> queryArgs) {
+        BasicDBObject searchQuery = new BasicDBObject();
+        queryArgs.forEach(searchQuery::put);
+        return collection.findOne(searchQuery);
     }
 
     void delete(DBCollection collection, Map<String, Object> queryArgs) {
         BasicDBObject searchQuery = new BasicDBObject();
         queryArgs.forEach(searchQuery::put);
-        System.out.println(collection.remove(searchQuery));
+        collection.remove(searchQuery);
+    }
+
+    private void printOffer(DBObject obj) {
+        System.out.println("id: " + obj.get("id") + "\n" +
+                "AccountName: " + obj.get("accountName") + "\n" +
+                "AvailableFrom: " + obj.get("availableFrom") + "\n" +
+                "AvailableTo: " + obj.get("availableTo") + "\n" +
+                "Price: " + obj.get("price") + "\n");
     }
 
 }
