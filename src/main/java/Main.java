@@ -1,6 +1,6 @@
 import logic.ServiceManager;
 
-public class Janusz {
+public class Main {
 
     public static void main(String[] args) {
         ServiceManager serviceManager = new ServiceManager();

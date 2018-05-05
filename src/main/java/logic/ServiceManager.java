@@ -22,7 +22,7 @@ public class ServiceManager {
     public void mainLoop() {
         boolean exit = false;
         while (!exit) {
-            //printHelp();
+            printHelp();
             System.out.println("OK");
             int option = scanner.nextInt();
             scanner.nextLine();
@@ -59,6 +59,7 @@ public class ServiceManager {
                     break;
                 default:
                     System.out.println("There is no such an option");
+                    printHelp();
             }
         }
     }
@@ -70,7 +71,7 @@ public class ServiceManager {
                 "2) Login \n" +
                 "3) Get wallet info \n" +
                 "4) Print available account names \n" +
-                "5) Add new offer \n" +
+                "5) Add a new offer \n" +
                 "6) List offers from given date two weeks ahead \n" +
                 "7) List all offers \n" +
                 "8) Delete offer \n" +

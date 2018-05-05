@@ -1,20 +1,17 @@
 package logic;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.collect.ImmutableList;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import model.Account;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.InsufficientMoneyException;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 class TransactionManager {
@@ -122,19 +119,37 @@ class TransactionManager {
         } catch (InsufficientMoneyException e) {
             assert e.missing != null;
             System.out.println("Not enough coins in your wallet. Missing " + e.missing.getValue() + " satoshis are missing (including fees)");
-
-            ListenableFuture<Coin> balanceFuture = to.getWallet().wallet().getBalanceFuture(value, Wallet.BalanceType.AVAILABLE);
-            FutureCallback<Coin> callback = new FutureCallback<Coin>() {
-                public void onSuccess(Coin balance) {
-                    System.out.println("Coins arrived to " + to.getAccountName());
-                }
-
-                public void onFailure(Throwable t) {
-                    System.out.println("Something went wrong");
-                }
-            };
-            Futures.addCallback(balanceFuture, callback);
         }
+        return success;
+    }
+
+    private boolean makeContract(Account from, Account to, String amount) {
+
+        boolean success = false;
+        ECKey client = new ECKey();
+        ECKey seller = new ECKey();
+
+        from.getWallet().wallet().importKey(client);
+        to.getWallet().wallet().importKey(seller);
+
+        Transaction contract = new Transaction(TestNet3Params.get());
+        List<ECKey> keys = ImmutableList.of(client, seller);
+
+        Script script = ScriptBuilder.createMultiSigOutputScript(2, keys);
+
+        Coin value = Coin.parseCoin(amount);
+        contract.addOutput(value, script);
+
+        SendRequest req = SendRequest.forTx(contract);
+        try {
+            from.getWallet().wallet().completeTx(req);
+            System.out.println("Contract has been made");
+            success = true;
+        } catch (InsufficientMoneyException e) {
+            assert e.missing != null;
+            System.out.println("Not enough coins in your wallet. Missing " + e.missing.getValue() + " satoshis are missing (including fees)");
+        }
+        from.getWallet().peerGroup().broadcastTransaction(req.tx);
         return success;
     }
 

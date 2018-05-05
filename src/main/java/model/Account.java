@@ -27,6 +27,12 @@ public class Account {
         WalletAppKit kit = new WalletAppKit(TestNet3Params.get(), new File("./wallets"), accountName);
         kit.startAsync();
         kit.awaitRunning();
+
+        kit.wallet().addCoinsReceivedEventListener((wallet, transaction, prevBalance, newBalance) -> {
+            System.out.println(accountName + " received bitcoins.");
+            System.out.println("New balance: " + newBalance.toFriendlyString());
+        });
+
         wallet = kit;
     }
 }
